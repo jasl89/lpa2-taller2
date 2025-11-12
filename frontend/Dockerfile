@@ -1,5 +1,5 @@
 # Imagen base oficial de Python
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 # Crear directorio de trabajo
 WORKDIR /app
@@ -16,6 +16,6 @@ COPY ./app .
 # Exponer puerto
 EXPOSE 3000
 
-# Comando de arranque
+# Comando de arranque con modo debug para desarrollo
 CMD ["python", "main.py"]
 
