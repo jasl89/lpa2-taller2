@@ -1,0 +1,9 @@
+[run]
+source = backend/app
+omit = 
+    */__pycache__/*
+    */venv/*
+    */tests/*
+    
+[report]
+fail_under = 80
