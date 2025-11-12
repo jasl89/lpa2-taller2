@@ -1,17 +1,11 @@
-# Generador de Facturas
+# Generador de Facturas - Taller 2 LPA2
 
-Sistema completo de generación de facturas, utilizando [FastAPI](https://fastapi.tiangolo.com/) para el backend que genera datos sintéticos con [Faker](https://faker.readthedocs.io/), y proporciona un frontend web con [Flask](https://flask.palletsprojects.com/) para generar PDFs de las facturas con [ReportLab](https://docs.reportlab.com/reportlab/userguide/ch1_intro/).
+Autor: Jhon Salcedo  
+GitHub: @jasl89
 
-## Autor
+## Descripción
 
-- Nombre del Estudiante - @perfil_de_github
-
-## Descripción del Proyecto
-
-Este proyecto consta de dos servicios principales:
-
-- **Backend API**: FastAPI que genera datos sintéticos de facturas utilizando Faker
-- **Frontend Web**: Aplicación web que consume el API y genera PDFs descargables de las facturas
+Sistema completo de generación de facturas electrónicas en español, utilizando FastAPI y Flask. El backend genera datos sintéticos de productos electrodomésticos Haceb (neveras, lavadoras, hornos, microondas, televisores, licuadoras, etc.) con Faker. El frontend permite consultar facturas y generar PDFs con ReportLab y Bootstrap.
 
 ## Arquitectura
 
@@ -19,158 +13,206 @@ Este proyecto consta de dos servicios principales:
 ┌────────────────┐          ┌───────────────┐
 │  Frontend Web  │ ───────> │  Backend API  │
 │  puerto 3000   │   HTTP   │  puerto 8000  │
-│  Flask + RLab  │ <─────── │  FastAPI      │
+│  Flask + PDF   │ <─────── │  FastAPI + Faker │
 └────────────────┘          └───────────────┘
 ```
 
 ## Estructura del Proyecto
 
 ```
-factura-generator/
-├── docker-compose.yml          # Orquestación de servicios
-├── README.md                   # Este archivo
-├── backend/                    # Servicio API
+lpa2-taller2/
+├── docker-compose.yml
+├── README.md
+├── .pre-commit-config.yaml
+├── pytest.ini
+├── .coveragerc
+├── backend/
 │   ├── Dockerfile
 │   └── app/
-│       ├── main.py            # API FastAPI
-│       └── requirements.txt
-└── frontend/                   # Servicio Frontend
+│       ├── main.py
+│       ├── requirements.txt
+│       └── tests/
+│           ├── test_main.py
+│           └── __init__.py
+└── frontend/
     ├── Dockerfile
     └── app/
-        ├── main.py            # Servidor web Flask
+        ├── main.py
         ├── requirements.txt
-        ├── static/            # Archivos estáticos
+        ├── static/
         │   ├── css/
-        │   │    └── style.css
+        │   │   └── style.css
         │   └── js/
-        │        └── app.js
-        └── templates/         # Plantillas HTML
+        │       └── app.js
+        └── templates/
             └── index.html
 ```
 
-## Inicio Rápido
+## Tecnologías
+
+- Backend: FastAPI, Faker, Uvicorn, Pydantic
+- Frontend: Flask, Bootstrap 5, ReportLab
+- Testing: pytest, pytest-cov (cobertura mínima 80%)
+- Linting: ruff
+- Pre-commit hooks: validación de código antes de commits
+- Containerización: Docker, Docker Compose
+
+## Instalación y Ejecución
 
 ### Prerrequisitos
 
 - Docker
 - Docker Compose
 
-### Instalación y Ejecución
-
-1. **Clonar el repositorio**
+### Iniciar el Proyecto
 
 ```bash
-git clone https://github.com/UR-CC/lpa2-taller2.git
+# Clonar el repositorio
+git clone https://github.com/jasl89/lpa2-taller2.git
 cd lpa2-taller2
-```
 
-2. **Construir y levantar los servicios**
-
-```bash
+# Construir y levantar los servicios
 docker-compose up --build
 ```
 
-3. **Acceder a la aplicación**
+### Acceso
 
-- Frontend: `http://localhost:3000`
-- Backend API: `http://localhost:8000`
-- Documentación API: `http://localhost:8000/docs`
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- Documentación API: http://localhost:8000/docs
 
-## Backend (API de Facturas)
+## Backend API
 
-El backend expone un *endpoint* que genera facturas sintéticas:
+### Endpoints Principales
 
-**Endpoint:** `GET /facturas/v1/{numero_factura}`
+**GET /** - Información del API
 
-**Ejemplo de uso:**
+**GET /facturas/v1/{numero_factura}** - Genera una factura con datos sintéticos
 
-```bash
-curl http://localhost:8000/facturas/v1/FAC-2025-001
-```
+**GET /health** - Health check del servicio
 
-**Ejemplo de la Respuesta:**
+### Ejemplo de Respuesta
 
 ```json
 {
-  "numero_factura": "FAC-2025-001",
-  "fecha_emision": "2025-08-15",
-  "empresa": {
-    "nombre": "Tech Solutions S.L.",
-    "direccion": "Calle Mayor 123, Madrid",
-    "telefono": "+34 912 345 678",
-    "email": "contacto@techsolutions.es"
-  },
-  "cliente": {
-    "nombre": "Industrias López",
-    "direccion": "Av. Libertad 456, Barcelona",
-    "telefono": "+34 933 456 789"
-  },
-  "detalle": [...],
-  "subtotal": 1250.00,
-  "impuesto": 262.50,
-  "total": 1512.50
+  "numero_factura": "FAC-001",
+  "fecha": "2025-11-12 10:30:45",
+  "cliente_nombre": "Juan Pérez García",
+  "cliente_documento": "45678912",
+  "cliente_direccion": "Calle 45 #23-67, Medellín",
+  "cliente_telefono": "+57 300 123 4567",
+  "cliente_email": "juan.perez@email.com",
+  "productos": [
+    {
+      "codigo": "HAC-1234",
+      "nombre": "Nevera Haceb No Frost 350L",
+      "categoria": "Refrigeración",
+      "cantidad": 2,
+      "precio_unitario": 1450000,
+      "subtotal": 2900000
+    }
+  ],
+  "subtotal": 2900000,
+  "iva": 551000,
+  "total": 3451000
 }
 ```
 
-## Frontend (Generador de PDF)
+### Productos Electrodomésticos Haceb
 
-El frontend proporciona una interfaz web donde:
+El sistema genera facturas con productos reales de Haceb:
+- Neveras (Frost y No Frost)
+- Lavadoras (12kg y 18kg)
+- Estufas y hornos
+- Microondas
+- Televisores (LED y Smart)
+- Licuadoras
+- Ventiladores
+- Aires acondicionados
+- Campanas extractoras
+- Calentadores de agua
 
-1. El usuario ingresa un número de factura
-2. Se consulta el API backend
-3. Se genera un PDF profesional con los datos
-4. El usuario puede descargar o imprimir el PDF
+## Frontend
 
-### Tecnologías del Frontend
+### Funcionalidades
 
-- **Flask**: Servidor web
-- **Jinja2**: Motor de plantillas
-- **HTML/CSS/JavaScript**: Interfaz de usuario
+1. Interfaz web con Bootstrap 5 (colores neutros: grises, blancos y azul suave)
+2. Formulario para ingresar número de factura
+3. Consulta al backend vía API REST
+4. Visualización de datos de la factura
+5. Generación y descarga de PDF profesional con ReportLab
 
 ### Modificar el Frontend
 
-- Editar `frontend/app/main.py` para crear la lógica de la consulta del API y generación del PDF
-- Editar `frontend/app/templates/index.html` para modificar el diseño de la interfaz Web
-- Editar `frontend/app/static/css/style.css` para modificar los estilos 
-- Editar `frontend/app/static/js/app.js` para ajustar lógica de la interfaz, si se requiere
+- `frontend/app/main.py` - Lógica del servidor Flask y generación de PDF
+- `frontend/app/templates/index.html` - Interfaz HTML
+- `frontend/app/static/css/style.css` - Estilos CSS
+- `frontend/app/static/js/app.js` - Lógica JavaScript
 
-## Configuración Avanzada
+## Testing
 
-### Variables de Entorno
+### Ejecutar Pruebas
 
-Puedes modificar el `docker-compose.yml` para añadir variables de entorno:
+```bash
+# Ejecutar todas las pruebas
+pytest -v
 
-```yaml
-environment:
-  - API_URL=http://backend:8000
-  - DEBUG=true
+# Ejecutar con cobertura
+pytest --cov=backend/app --cov-report=term-missing
+
+# Verificar cobertura mínima (80%)
+pytest --cov=backend/app --cov-fail-under=80
 ```
 
-### Puertos Personalizados
+### Cobertura de Pruebas
 
-Modificar en `docker-compose.yml`:
+Las pruebas incluyen:
+- Pruebas de endpoints (éxito y error)
+- Validación de cálculos (subtotal, IVA, total)
+- Verificación de productos Haceb
+- Pruebas de generadores de datos
+- Pruebas de integración end-to-end
 
-```yaml
-ports:
-  - "8080:3000"  # Frontend en puerto 8080
-  - "9000:8000"  # Backend en puerto 9000
+## Pre-commit Hooks
+
+### Instalación
+
+```bash
+# Instalar pre-commit
+pip install pre-commit pytest pytest-cov ruff
+
+# Instalar hooks
+pre-commit install
 ```
 
-## Uso de la Aplicación
+### Ejecutar Manualmente
 
-1. **Abrir el navegador** en `http://localhost:3000`
-2. **Ingresar número de factura** (ej: FAC-2025-001, INV-2024-123, etc.)
-3. **Hacer clic en "Generar Factura"**
-4. **Ver la vista previa** de la factura
-5. **Descargar PDF** haciendo clic en "Descargar PDF"
+```bash
+# Ejecutar en todos los archivos
+pre-commit run --all-files
 
-## Comandos Docker Útiles
+# Ejecutar solo ruff
+pre-commit run ruff --all-files
+
+# Ejecutar solo pytest
+pre-commit run pytest --all-files
+```
+
+### Configuración
+
+El archivo `.pre-commit-config.yaml` ejecuta automáticamente:
+- ruff: Validación de estilo y corrección automática
+- pytest: Ejecución de pruebas con cobertura mínima del 80%
+
+## Docker
+
+### Comandos Útiles
 
 ```bash
 # Levantar servicios
 docker-compose up
 
-# Levantar servicios en segundo plano
+# Levantar en segundo plano
 docker-compose up -d
 
 # Reconstruir imágenes
@@ -179,7 +221,7 @@ docker-compose up --build
 # Ver logs
 docker-compose logs -f
 
-# Ver logs de un servicio específico
+# Ver logs de un servicio
 docker-compose logs -f backend
 docker-compose logs -f frontend
 
@@ -189,34 +231,70 @@ docker-compose down
 # Detener y eliminar volúmenes
 docker-compose down -v
 
-# Reiniciar un servicio específico
+# Reiniciar un servicio
 docker-compose restart backend
 ```
 
-## 🧪 Testing
+### Variables de Entorno
 
-### Probar el Backend
+Configuradas en `docker-compose.yml`:
+
+```yaml
+environment:
+  - API_URL=http://backend:8000
+  - DEBUG=true
+```
+
+## Commits y Control de Versiones
+
+### Convención de Commits
 
 ```bash
-# Endpoint de salud
+git add .
+git commit -m "feat: agregar endpoint de facturas"
+git commit -m "test: agregar pruebas de API"
+git commit -m "fix: corregir generación de PDF"
+git commit -m "chore: actualizar pre-commit y ruff"
+git push origin main
+```
+
+### Tipos de Commits
+
+- `feat`: Nueva funcionalidad
+- `fix`: Corrección de errores
+- `test`: Agregar o modificar pruebas
+- `chore`: Tareas de mantenimiento
+- `docs`: Documentación
+- `style`: Formato de código
+- `refactor`: Refactorización
+
+## Uso de la Aplicación
+
+1. Abrir navegador en http://localhost:3000
+2. Ingresar número de factura (ej: FAC-2024-001, INV-123, etc.)
+3. Hacer clic en "Consultar Factura"
+4. Ver detalles de la factura generada
+5. Hacer clic en "Descargar PDF" para obtener el documento
+
+## Pruebas del Backend
+
+```bash
+# Endpoint raíz
 curl http://localhost:8000/
 
 # Generar factura
+curl http://localhost:8000/facturas/v1/TEST-001
+
+# Con formato JSON
 curl http://localhost:8000/facturas/v1/TEST-001 | jq
 
-# Usando httpie (más legible)
-http http://localhost:8000/facturas/v1/TEST-001
+# Health check
+curl http://localhost:8000/health
 ```
 
-### Probar el Frontend
+## Documentación API
 
-1. Navegar a `http://localhost:3000`
-2. Probar diferentes números de factura
-3. Verificar generación correcta de PDFs
-
-## API Documentation
-
-La documentación interactiva de Swagger está disponible en:
-- `http://localhost:8000/docs` (Swagger UI)
-- `http://localhost:8000/redoc` (ReDoc)
+Documentación interactiva disponible en:
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
 
