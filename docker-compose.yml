@@ -1,21 +1,26 @@
-services:
+version: '3.8'
 
+services:
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: factura-api
+    container_name: factura-backend
     ports:
       - "8000:8000"
+    environment:
+      - DEBUG=true
     networks:
       - factura-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    volumes:
+      - ./backend/app:/app
 
   frontend:
     build:
@@ -25,15 +30,18 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - BACKEND_API_URL=http://backend:8000
+      - API_URL=http://backend:8000
+      - DEBUG=true
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - factura-network
     restart: unless-stopped
+    volumes:
+      - ./frontend/app:/app
 
 networks:
-
   factura-network:
     driver: bridge
 
